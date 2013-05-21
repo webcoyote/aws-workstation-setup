@@ -1,0 +1,7 @@
+cookbook_paths:
+- ./cookbooks
+
+recipes:
+- pivotal_workstation::perforce
+- pivotal_workstation::vagrant
+
