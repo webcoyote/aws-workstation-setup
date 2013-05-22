@@ -1,0 +1,34 @@
+######################################################################
+#
+# awsconfig.yml
+# YAML configuration file for AWS credentials for aws-vm project
+#
+# By default this file should be stored in $HOME/Private/awsconfig.yml but it
+# can be stored in another location by setting an environment variable:
+#   export AWS_CONFIG_FILE=/path/to/file.yml
+#
+# You should use ecryptfs-mount-private or another encryption method to
+# safeguard these credentials.
+#
+
+# You can locate your AWS access keys by visiting:
+#  https://portal.aws.amazon.com/gp/aws/securityCredentials#access_credentials
+
+  :AccessKeyId: YOUR_ACCESS_KEY_HERE
+  :SecretAccessKey: YOUR_SECRET_KEY_HERE
+
+# KeyPairName is the name of one of your keys in the amazon EC2 KeyPairs list,
+# which you can locate by visiting:
+#  https://console.aws.amazon.com/ec2/home?region=us-east-1#s=KeyPairs
+
+  :KeyPairName: YOUR_EC2_KEYPAIR_NAME_HERE
+
+# KeyFileName is the path to your SSH secret key associated with the AWS keypair
+# listed above. You can use a relative path from the directory of *this* config
+# file or an absolute path. Examples:
+#
+#   /encrypted-folder/somekeyfile.pem
+#   ~/.ssh/id_rsa
+#   ../keyfile.pem
+
+  :KeyFileName: PATH_TO_YOUR_PRIVATE_KEY_HERE

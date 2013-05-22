@@ -1,0 +1,4 @@
+# Minimal Perforce configuration file
+P4PASSWD=
+P4PORT=
+P4USER=
