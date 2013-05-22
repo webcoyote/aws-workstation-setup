@@ -149,4 +149,6 @@ create_config_template p4config
 create_config_template awsconfig.yml
 
 echo "Setup complete"
+echo
+echo "Please edit your credentials files, which are stored in ~/.credentials"
 

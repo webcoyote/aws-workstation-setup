@@ -5,3 +5,9 @@ recipes:
 - pivotal_workstation::perforce
 - pivotal_workstation::vagrant
 - pivotal_workstation::truecrypt
+- pivotal_workstation::linux-packages
+
+node_attributes:
+  linux-packages:
+    -
+      - ecryptfs-utils
