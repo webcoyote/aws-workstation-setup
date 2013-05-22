@@ -4,4 +4,4 @@ cookbook_paths:
 recipes:
 - pivotal_workstation::perforce
 - pivotal_workstation::vagrant
-
+- pivotal_workstation::truecrypt

@@ -18,9 +18,11 @@ Use my [linux-vm](https://github.com/webcoyote/linux-vm) project to build a Linu
 Installs:
 
 * Git
+* Ruby
 * Vagrant (+berkshelf +aws)
 * Perforce
 * Homebrew (OSX only)
+* ecryptfs (Linux only)
 
 
 # Author
