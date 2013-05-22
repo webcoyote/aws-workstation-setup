@@ -21,6 +21,7 @@ Installs:
 * Ruby
 * Vagrant (+berkshelf +aws)
 * Perforce
+* TrueCrypt
 * Homebrew (OSX only)
 * ecryptfs (Linux only)
 
