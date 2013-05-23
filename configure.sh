@@ -89,17 +89,25 @@ function create_config_template () {
 # Ask for the password up front so the rest of the script just works
 sudo true
 
-# Ask for truecrypt password
-read -s -p "Enter TrueCrypt password for ~/.TrueCrypt/credentials.tc: " PASSWORD
-echo
-if [ ! -f ~/.TrueCrypt/credentials.tc ]; then
-  read -s -p "Please re-enter password: " PASSWORD2
-  echo
-  if [ "$PASSWORD" != "$PASSWORD2" ]; then
-    echo "Passwords don't match"
-    exit 1
-  fi
-fi
+case "$OSTYPE" in
+  darwin*)
+    # TrueCrypt doesn't work on the command line
+  ;;
+
+  linux*)
+    # Ask for truecrypt password
+    read -s -p "Enter TrueCrypt password for ~/.TrueCrypt/credentials.tc: " PASSWORD
+    echo
+    if [ ! -f ~/.TrueCrypt/credentials.tc ]; then
+      read -s -p "Please re-enter password: " PASSWORD2
+      echo
+      if [ "$PASSWORD" != "$PASSWORD2" ]; then
+        echo "Passwords don't match"
+        exit 1
+      fi
+    fi
+  ;;
+esac
 
 # Install packages
 homebrew_install
@@ -126,23 +134,37 @@ soloist
 install_vagrant_plugin vagrant-berkshelf
 install_vagrant_plugin vagrant-aws
 
-# Create truecrypt drive for credentials
-if [ ! -f ~/.TrueCrypt/credentials.tc ]; then
-  echo "-"
-  echo "Creating truecrypt file; takes five minutes :("
-  echo "If you move your mouse really quickly it will only take ~30 seconds -- really!"
-  echo "-"
-  truecrypt-cmd --create --size=$((1024*1024)) --volume-type=normal         \
-    --encryption=AES-Twofish-Serpent --hash=RIPEMD-160 --filesystem=fat     \
-    -p "$PASSWORD" --keyfiles='' --random-source=/dev/random        \
-      ~/.TrueCrypt/credentials.tc
-fi
+# Configure TrueCrypt
+mkdir -p ~/.TrueCrypt &>/dev/null
 
-# Unmount the credentials file in case it is mounted, then re-mount
-mkdir -p ~/.credentials
-truecrypt-cmd -d ~/.credentials &>/dev/null || true
-truecrypt-cmd --mount -p "$PASSWORD" --keyfiles='' \
-  --protect-hidden=no ~/.TrueCrypt/credentials.tc ~/.credentials
+case "$OSTYPE" in
+  darwin*)
+    # TrueCrypt command line provides a cryptic error:
+    # "this feature is only supported in text mode"
+    # when running from the command line, so ...
+    mkdir ~/.credentials &>/dev/null
+  ;;
+
+  linux*)
+    # Create truecrypt drive for credentials
+    if [ ! -f ~/.TrueCrypt/credentials.tc ]; then
+      echo "-"
+      echo "Creating truecrypt file; takes five minutes :("
+      echo "If you move your mouse really quickly it will only take ~30 seconds -- really!"
+      echo "-"
+      truecrypt-cmd --create --size=$((1024*1024)) --volume-type=normal         \
+        --encryption=AES-Twofish-Serpent --hash=RIPEMD-160 --filesystem=fat     \
+        -p "$PASSWORD" --keyfiles='' --random-source=/dev/random        \
+          ~/.TrueCrypt/credentials.tc
+    fi
+
+    # Unmount the credentials file in case it is mounted, then re-mount
+    mkdir -p ~/.credentials &>/dev/null
+    truecrypt-cmd -d ~/.credentials &>/dev/null || true
+    truecrypt-cmd --mount -p "$PASSWORD" --keyfiles='' \
+      --protect-hidden=no ~/.TrueCrypt/credentials.tc ~/.credentials
+  ;;
+esac
 
 # Configure AWS and Perforce
 create_config_template p4config
@@ -150,5 +172,12 @@ create_config_template awsconfig.yml
 
 echo "Setup complete"
 echo
-echo "Please edit your credentials files, which are stored in ~/.credentials"
+case "$OSTYPE" in
+  darwin*)
+    echo "Please edit AND ENCRYPT your credentials in ~/.credentials"
+  ;;
 
+  *)
+    echo "Please edit your credentials files, which are stored in ~/.credentials"
+  ;;
+esac
