@@ -85,29 +85,28 @@ function create_config_template () {
   fi
 }
 
-
-# Ask for the password up front so the rest of the script just works
-sudo true
-
+# setup truecrypt command
 case "$OSTYPE" in
   darwin*)
-    # TrueCrypt doesn't work on the command line
+    TRUECRYPT="/Applications/TrueCrypt.app/Contents/MacOS/TrueCrypt --text"
   ;;
 
   linux*)
-    # Ask for truecrypt password
-    read -s -p "Enter TrueCrypt password for ~/.TrueCrypt/credentials.tc: " PASSWORD
-    echo
-    if [ ! -f ~/.TrueCrypt/credentials.tc ]; then
-      read -s -p "Please re-enter password: " PASSWORD2
-      echo
-      if [ "$PASSWORD" != "$PASSWORD2" ]; then
-        echo "Passwords don't match"
-        exit 1
-      fi
-    fi
+    TRUECRYPT=truecrypt-cmd
   ;;
 esac
+
+# Ask for truecrypt password
+read -s -p "Enter TrueCrypt password for ~/.TrueCrypt/credentials.tc: " PASSWORD
+echo
+if [ ! -f ~/.TrueCrypt/credentials.tc ]; then
+  read -s -p "Please re-enter password: " PASSWORD2
+  echo
+  if [ "$PASSWORD" != "$PASSWORD2" ]; then
+    echo "Passwords don't match"
+    exit 1
+  fi
+fi
 
 # Install packages
 homebrew_install
@@ -121,7 +120,7 @@ github_update_repo opscode-cookbooks dmg ~/.cache/aws-prep/cookbooks
 github_update_repo opscode-cookbooks yum ~/.cache/aws-prep/cookbooks
 
 # Install soloist in system ruby
-(which soloist &>/dev/null) || (sudo gem install soloist </dev/null)
+(which soloist &>/dev/null) || (gem install soloist </dev/null)
 
 # Configure soloist
 cd ~/.cache/aws-prep
@@ -137,34 +136,23 @@ install_vagrant_plugin vagrant-aws
 # Configure TrueCrypt
 mkdir -p ~/.TrueCrypt &>/dev/null
 
-case "$OSTYPE" in
-  darwin*)
-    # TrueCrypt command line provides a cryptic error:
-    # "this feature is only supported in text mode"
-    # when running from the command line, so ...
-    mkdir ~/.credentials &>/dev/null
-  ;;
+# Create truecrypt drive for credentials
+if [ ! -f ~/.TrueCrypt/credentials.tc ]; then
+  echo "-"
+  echo "Creating truecrypt file; takes five minutes :("
+  echo "If you move your mouse really quickly it will only take ~30 seconds -- really!"
+  echo "-"
+  $TRUECRYPT --create --size=$((1024*1024)) --volume-type=normal         \
+    --encryption=AES-Twofish-Serpent --hash=RIPEMD-160 --filesystem=fat     \
+    -p "$PASSWORD" --keyfiles='' --random-source=/dev/random        \
+      ~/.TrueCrypt/credentials.tc
+fi
 
-  linux*)
-    # Create truecrypt drive for credentials
-    if [ ! -f ~/.TrueCrypt/credentials.tc ]; then
-      echo "-"
-      echo "Creating truecrypt file; takes five minutes :("
-      echo "If you move your mouse really quickly it will only take ~30 seconds -- really!"
-      echo "-"
-      truecrypt-cmd --create --size=$((1024*1024)) --volume-type=normal         \
-        --encryption=AES-Twofish-Serpent --hash=RIPEMD-160 --filesystem=fat     \
-        -p "$PASSWORD" --keyfiles='' --random-source=/dev/random        \
-          ~/.TrueCrypt/credentials.tc
-    fi
-
-    # Unmount the credentials file in case it is mounted, then re-mount
-    mkdir -p ~/.credentials &>/dev/null
-    truecrypt-cmd -d ~/.credentials &>/dev/null || true
-    truecrypt-cmd --mount -p "$PASSWORD" --keyfiles='' \
-      --protect-hidden=no ~/.TrueCrypt/credentials.tc ~/.credentials
-  ;;
-esac
+# Unmount the credentials file in case it is mounted, then re-mount
+mkdir -p ~/.credentials &>/dev/null
+$TRUECRYPT -d ~/.credentials &>/dev/null || true
+$TRUECRYPT --mount -p "$PASSWORD" --keyfiles='' \
+  --protect-hidden=no ~/.TrueCrypt/credentials.tc ~/.credentials
 
 # Configure AWS and Perforce
 create_config_template p4config
@@ -172,12 +160,4 @@ create_config_template awsconfig.yml
 
 echo "Setup complete"
 echo
-case "$OSTYPE" in
-  darwin*)
-    echo "Please edit AND ENCRYPT your credentials in ~/.credentials"
-  ;;
-
-  *)
-    echo "Please edit your credentials files, which are stored in ~/.credentials"
-  ;;
-esac
+echo "Please edit your credentials files, which are stored in ~/.credentials"
