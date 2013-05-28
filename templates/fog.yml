@@ -1,0 +1,10 @@
+#######################################################
+# Fog Credentials File
+#
+
+:default:
+  :aws_access_key_id:
+  :aws_secret_access_key:
+  :private_key_path:        ~/.ssh/id_rsa
+  :public_key_path:         ~/.ssh/id_rsa.pub
+
