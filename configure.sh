@@ -85,10 +85,6 @@ function create_config_template () {
   fi
 }
 
-
-# Ask for the password up front so the rest of the script just works
-sudo true
-
 case "$OSTYPE" in
   darwin*)
     # TrueCrypt doesn't work on the command line
@@ -121,7 +117,7 @@ github_update_repo opscode-cookbooks dmg ~/.cache/aws-prep/cookbooks
 github_update_repo opscode-cookbooks yum ~/.cache/aws-prep/cookbooks
 
 # Install soloist in system ruby
-(which soloist &>/dev/null) || (sudo gem install soloist </dev/null)
+(which soloist &>/dev/null) || (gem install soloist </dev/null)
 
 # Configure soloist
 cd ~/.cache/aws-prep
