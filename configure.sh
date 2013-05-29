@@ -71,27 +71,27 @@ function github_update_repo () {
 
 function rbenv_install () {
   if which rbenv &>/dev/null; then
-    return
+    RBENVDIR=$(dirname $(dirname `which rbenv`))
+  else
+    case "$OSTYPE" in
+      darwin*)
+        brew install rbenv ruby-build
+        RBENVDIR=(dirname $(dirname `which rbenv`))
+      ;;
+
+      linux*)
+        # We could use apt-get install rbenv, but ruby-build is not included!
+        git_update_repo git://github.com/sstephenson/rbenv ~/.rbenv
+        git_update_repo git://github.com/sstephenson/ruby-build ~/.rbenv/plugins/ruby-build
+        RBENVDIR=$HOME/.rbenv
+      ;;
+
+      *)
+        echo Unknown OS: $OSTYPE;
+        exit 1
+      ;;
+    esac
   fi
-
-  case "$OSTYPE" in
-    darwin*)
-      brew install rbenv ruby-build
-      RBENVDIR=dirname $(dirname `which rbenv`)
-    ;;
-
-    linux*)
-      # We could use apt-get install rbenv, but ruby-build is not included!
-      git_update_repo git://github.com/sstephenson/rbenv ~/.rbenv
-      git_update_repo git://github.com/sstephenson/ruby-build ~/.rbenv/plugins/ruby-build
-      RBENVDIR=$HOME/.rbenv
-    ;;
-
-    *)
-      echo Unknown OS: $OSTYPE;
-      exit 1
-    ;;
-  esac
 
   export PATH=$RBENVDIR/bin:$PATH
   eval "$(rbenv init -)"
