@@ -108,6 +108,7 @@ function ruby_install () {
 function soloist_install () {
   if ! which soloist &>/dev/null; then
     gem install soloist </dev/null
+    rbenv rehash
   fi
 }
 
