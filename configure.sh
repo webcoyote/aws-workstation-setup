@@ -123,12 +123,10 @@ function get_template () {
 }
 
 function create_config_template () {
-  pushd ~/Private/credentials &>/dev/null
   if [ ! -f "$1" ]; then
     get_template "$1"
     ln -s -f "$1" "$2"
   fi
-  popd &>/dev/null
 }
 
 function truecrypt_prepare () {
@@ -218,9 +216,9 @@ $TRUECRYPT --mount -p "$PASSWORD" --keyfiles='' \
   --protect-hidden=no ~/.TrueCrypt/credentials.tc ~/Private/credentials
 
 # Configure AWS, Fog and Perforce
-create_config_template p4config       ~/.p4config
-create_config_template awsconfig.yml  ~/.awsconfig
-create_config_template fog.yml        ~/.fog
+create_config_template ~/Private/credentials/p4config       ~/.p4config
+create_config_template ~/Private/credentials/awsconfig.yml  ~/.awsconfig
+create_config_template ~/Private/credentials/fog.yml        ~/.fog
 
 echo "Setup complete"
 echo
