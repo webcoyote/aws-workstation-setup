@@ -187,6 +187,7 @@ get_template soloistrc
 soloist
 install_vagrant_plugin vagrant-berkshelf
 install_vagrant_plugin vagrant-aws
+install_vagrant_plugin vagrant-omnibus
 
 # Configure TrueCrypt
 mkdir -p ~/.TrueCrypt &>/dev/null
